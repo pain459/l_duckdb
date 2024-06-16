@@ -1,0 +1,144 @@
+# Just launch duckdb without any database created or attached
+$ duckdb
+
+# How to exit duckdb shell?
+$ .exit
+
+# Start duckdb with a database
+$ duckdb demodb1.duckdb
+
+---
+# Check for available extensions
+
+$ DESCRIBE SELECT * FROM duckdb_extensions();
+┌───────────────────┬─────────────┬─────────┬─────────┬─────────┬─────────┐
+│    column_name    │ column_type │  null   │   key   │ default │  extra  │
+│      varchar      │   varchar   │ varchar │ varchar │ varchar │ varchar │
+├───────────────────┼─────────────┼─────────┼─────────┼─────────┼─────────┤
+│ extension_name    │ VARCHAR     │ YES     │         │         │         │
+│ loaded            │ BOOLEAN     │ YES     │         │         │         │
+│ installed         │ BOOLEAN     │ YES     │         │         │         │
+│ install_path      │ VARCHAR     │ YES     │         │         │         │
+│ description       │ VARCHAR     │ YES     │         │         │         │
+│ aliases           │ VARCHAR[]   │ YES     │         │         │         │
+│ extension_version │ VARCHAR     │ YES     │         │         │         │
+│ install_mode      │ VARCHAR     │ YES     │         │         │         │
+│ installed_from    │ VARCHAR     │ YES     │         │         │         │
+└───────────────────┴─────────────┴─────────┴─────────┴─────────┴─────────┘
+---
+
+# Check what extensions are loaded and ready to use
+
+$ SELECT extension_name, loaded, installed from duckdb_extensions() ORDER BY installed DESC, loaded DESC;
+┌──────────────────┬─────────┬───────────┐
+│  extension_name  │ loaded  │ installed │
+│     varchar      │ boolean │  boolean  │
+├──────────────────┼─────────┼───────────┤
+│ autocomplete     │ true    │ true      │
+│ fts              │ true    │ true      │
+│ icu              │ true    │ true      │
+│ inet             │ true    │ true      │
+│ jemalloc         │ true    │ true      │
+│ json             │ true    │ true      │
+│ parquet          │ true    │ true      │
+│ shell            │ true    │ true      │
+│ tpch             │ true    │ true      │
+│ arrow            │ false   │ false     │
+│ aws              │ false   │ false     │
+│ azure            │ false   │ false     │
+│ delta            │ false   │ false     │
+│ excel            │ false   │ false     │
+│ httpfs           │ false   │ false     │
+│ iceberg          │ false   │ false     │
+│ motherduck       │ false   │ false     │
+│ mysql_scanner    │ false   │ false     │
+│ postgres_scanner │ false   │ false     │
+│ spatial          │ false   │ false     │
+│ sqlite_scanner   │ false   │ false     │
+│ substrait        │ false   │ false     │
+│ tpcds            │ false   │ false     │
+│ vss              │ false   │ false     │
+├──────────────────┴─────────┴───────────┤
+│ 24 rows                      3 columns │
+└────────────────────────────────────────┘
+---
+
+# Install and load httpfs so we can query the data directly from the web
+
+D INSTALL httpfs;
+D LOAD httpfs;
+D SELECT extension_name, loaded, installed from duckdb_extensions() ORDER BY installed DESC, loaded DESC;
+┌──────────────────┬─────────┬───────────┐
+│  extension_name  │ loaded  │ installed │
+│     varchar      │ boolean │  boolean  │
+├──────────────────┼─────────┼───────────┤
+│ autocomplete     │ true    │ true      │
+│ fts              │ true    │ true      │
+│ httpfs           │ true    │ true      │
+│ icu              │ true    │ true      │
+│ inet             │ true    │ true      │
+│ jemalloc         │ true    │ true      │
+│ json             │ true    │ true      │
+│ parquet          │ true    │ true      │
+│ shell            │ true    │ true      │
+│ tpch             │ true    │ true      │
+│ arrow            │ false   │ false     │
+│ aws              │ false   │ false     │
+│ azure            │ false   │ false     │
+│ delta            │ false   │ false     │
+│ excel            │ false   │ false     │
+│ iceberg          │ false   │ false     │
+│ motherduck       │ false   │ false     │
+│ mysql_scanner    │ false   │ false     │
+│ postgres_scanner │ false   │ false     │
+│ spatial          │ false   │ false     │
+│ sqlite_scanner   │ false   │ false     │
+│ substrait        │ false   │ false     │
+│ tpcds            │ false   │ false     │
+│ vss              │ false   │ false     │
+├──────────────────┴─────────┴───────────┤
+│ 24 rows                      3 columns │
+└────────────────────────────────────────┘
+---
+
+# Querying and setting memory limits in duckdb
+
+D SELECT CURRENT_SETTING('memory_limit');
+┌─────────────────────────────────┐
+│ current_setting('memory_limit') │
+│             varchar             │
+├─────────────────────────────────┤
+│ 24.8 GiB                        │
+└─────────────────────────────────┘
+D SET MEMORY_LIMIT='1GB';
+D SELECT CURRENT_SETTING('memory_limit');
+┌─────────────────────────────────┐
+│ current_setting('memory_limit') │
+│             varchar             │
+├─────────────────────────────────┤
+│ 953.6 MiB                       │
+└─────────────────────────────────┘
+D SET MEMORY_LIMIT='1GiB';
+D SELECT CURRENT_SETTING('memory_limit');
+┌─────────────────────────────────┐
+│ current_setting('memory_limit') │
+│             varchar             │
+├─────────────────────────────────┤
+│ 1.0 GiB                         │
+└─────────────────────────────────┘
+D 
+---
+
+# Query excel data from the external source
+
+D SELECT COUNT(*) FROM read_csv_auto ('https://raw.githubusercontent.com/JeffSackmann/tennis_atp/master/atp_matches_2023.csv');
+┌──────────────┐
+│ count_star() │
+│    int64     │
+├──────────────┤
+│         2986 │
+└──────────────┘
+D 
+
+---
+
