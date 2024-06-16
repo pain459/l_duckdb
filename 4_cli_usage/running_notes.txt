@@ -1,0 +1,110 @@
+# Install sqlite extension first on duckdb
+$ duckdb
+v1.0.0 1f98600c2c
+Enter ".help" for usage hints.
+Connected to a transient in-memory database.
+Use ".open FILENAME" to reopen on a persistent database.
+D INSTALL sqlite;
+
+---
+
+# open chinook.db in duckdb
+$ duckdb chinook.db
+
+---
+
+# Explore the DB. use SHOW TABLES (standard way)
+D SHOW TABLES;
+┌──────────────────┐
+│       name       │
+│     varchar      │
+├──────────────────┤
+│ albums           │
+│ artists          │
+│ customers        │
+│ employees        │
+│ genres           │
+│ invoice_items    │
+│ invoices         │
+│ media_types      │
+│ playlist_track   │
+│ playlists        │
+│ sqlite_sequence  │
+│ sqlite_stat1     │
+│ tracks           │
+│ v_average_checks │
+├──────────────────┤
+│     14 rows      │
+└──────────────────┘
+D 
+
+---
+
+# Explore tables in duckdb way
+D .tables
+albums            employees         invoices          playlists       
+artists           genres            media_types       tracks          
+customers         invoice_items     playlist_track    v_average_checks
+D 
+
+---
+
+# Selecting data from the invoices tables
+D SELECT * FROM invoices LIMIT 5;
+┌───────────┬────────────┬─────────────────────┬─────────────────────────┬─────────────┬──────────────┬────────────────┬───────────────────┬────────┐
+│ InvoiceId │ CustomerId │     InvoiceDate     │     BillingAddress      │ BillingCity │ BillingState │ BillingCountry │ BillingPostalCode │ Total  │
+│   int64   │   int64    │      timestamp      │         varchar         │   varchar   │   varchar    │    varchar     │      varchar      │ double │
+├───────────┼────────────┼─────────────────────┼─────────────────────────┼─────────────┼──────────────┼────────────────┼───────────────────┼────────┤
+│         1 │          2 │ 2009-01-01 00:00:00 │ Theodor-Heuss-Straße 34 │ Stuttgart   │              │ Germany        │ 70174             │   1.98 │
+│         2 │          4 │ 2009-01-02 00:00:00 │ Ullevålsveien 14        │ Oslo        │              │ Norway         │ 0171              │   3.96 │
+│         3 │          8 │ 2009-01-03 00:00:00 │ Grétrystraat 63         │ Brussels    │              │ Belgium        │ 1000              │   5.94 │
+│         4 │         14 │ 2009-01-06 00:00:00 │ 8210 111 ST NW          │ Edmonton    │ AB           │ Canada         │ T6G 2C7           │   8.91 │
+│         5 │         23 │ 2009-01-11 00:00:00 │ 69 Salem Street         │ Boston      │ MA           │ USA            │ 2113              │  13.86 │
+└───────────┴────────────┴─────────────────────┴─────────────────────────┴─────────────┴──────────────┴────────────────┴───────────────────┴────────┘
+D 
+
+---
+
+# Describing the table with datatypes
+D DESCRIBE SELECT * FROM invoices;
+┌───────────────────┬─────────────┬─────────┬─────────┬─────────┬─────────┐
+│    column_name    │ column_type │  null   │   key   │ default │  extra  │
+│      varchar      │   varchar   │ varchar │ varchar │ varchar │ varchar │
+├───────────────────┼─────────────┼─────────┼─────────┼─────────┼─────────┤
+│ InvoiceId         │ BIGINT      │ YES     │         │         │         │
+│ CustomerId        │ BIGINT      │ YES     │         │         │         │
+│ InvoiceDate       │ TIMESTAMP   │ YES     │         │         │         │
+│ BillingAddress    │ VARCHAR     │ YES     │         │         │         │
+│ BillingCity       │ VARCHAR     │ YES     │         │         │         │
+│ BillingState      │ VARCHAR     │ YES     │         │         │         │
+│ BillingCountry    │ VARCHAR     │ YES     │         │         │         │
+│ BillingPostalCode │ VARCHAR     │ YES     │         │         │         │
+│ Total             │ DOUBLE      │ YES     │         │         │         │
+└───────────────────┴─────────────┴─────────┴─────────┴─────────┴─────────┘
+
+---
+
+# Describing in duckdb way
+D DESCRIBE FROM invoices;
+┌───────────────────┬─────────────┬─────────┬─────────┬─────────┬─────────┐
+│    column_name    │ column_type │  null   │   key   │ default │  extra  │
+│      varchar      │   varchar   │ varchar │ varchar │ varchar │ varchar │
+├───────────────────┼─────────────┼─────────┼─────────┼─────────┼─────────┤
+│ InvoiceId         │ BIGINT      │ YES     │         │         │         │
+│ CustomerId        │ BIGINT      │ YES     │         │         │         │
+│ InvoiceDate       │ TIMESTAMP   │ YES     │         │         │         │
+│ BillingAddress    │ VARCHAR     │ YES     │         │         │         │
+│ BillingCity       │ VARCHAR     │ YES     │         │         │         │
+│ BillingState      │ VARCHAR     │ YES     │         │         │         │
+│ BillingCountry    │ VARCHAR     │ YES     │         │         │         │
+│ BillingPostalCode │ VARCHAR     │ YES     │         │         │         │
+│ Total             │ DOUBLE      │ YES     │         │         │         │
+└───────────────────┴─────────────┴─────────┴─────────┴─────────┴─────────┘
+D 
+
+---
+
+
+
+
+
