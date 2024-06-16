@@ -269,5 +269,54 @@ D
 
 ---
 
+# Automated way to generate .csv files from duckdb shell itself.
 
+duckdb -csv \
+        -s "select winner_ioc, loser_ioc, winner_hand, loser_hand, count(distinct(tourney_id)) as num_winners, avg(winner_age) as avg_winner_age, max(loser_age) as max_loser_age
+        from read_csv_auto('https://raw.githubusercontent.com/JeffSackmann/tennis_atp/master/atp_matches_2023.csv')
+            group by all;"\
+          > results_2023.csv
+
+---
+
+# take a peek of the results from csv file.
+
+$ head -n 5 results_2023.csv 
+winner_ioc,loser_ioc,winner_hand,loser_hand,num_winners,avg_winner_age,max_loser_age
+USA,CZE,R,R,5,26.03333333333333,22.2
+GER,CZE,R,R,3,28.833333333333332,22.4
+AUS,GBR,R,R,6,25.71666666666667,36.4
+SRB,RUS,R,R,8,34.144444444444446,29.4
+
+---
+
+# Write a parquet file and it is light and easy to read
+
+duckdb \
+        -s "COPY (select winner_ioc, loser_ioc, winner_hand, loser_hand, count(distinct(tourney_id)) as num_winners, avg(winner_age) as avg_winner_age, max(loser_age) as max_loser_age
+        from read_csv_auto('https://raw.githubusercontent.com/JeffSackmann/tennis_atp/master/atp_matches_2023.csv')
+            group by all) TO '/dev/stdout' (FORMAT PARQUET)"\
+          > results_2023.parquet
+
+---
+
+# Size comparision
+
+$ ll results_2023.*
+-rw-r--r--. 1 ravik ravik 34410 Jun 16 09:51 results_2023.csv
+-rw-r--r--. 1 ravik ravik 28165 Jun 16 09:53 results_2023.parquet
+
+---
+
+# Read results from parquet file
+
+$ duckdb -s "FROM 'results_2023.parquet' LIMIT 3"
+┌────────────┬───────────┬─────────────┬────────────┬─────────────┬────────────────┬───────────────┐
+│ winner_ioc │ loser_ioc │ winner_hand │ loser_hand │ num_winners │ avg_winner_age │ max_loser_age │
+│  varchar   │  varchar  │   varchar   │  varchar   │    int64    │     double     │    double     │
+├────────────┼───────────┼─────────────┼────────────┼─────────────┼────────────────┼───────────────┤
+│ GRE        │ CRO       │ R           │ R          │           4 │          24.75 │          26.7 │
+│ GBR        │ USA       │ L           │ R          │           4 │           24.9 │          29.4 │
+│ GRE        │ BEL       │ U           │ R          │           1 │           18.3 │          23.5 │
+└────────────┴───────────┴─────────────┴────────────┴─────────────┴────────────────┴───────────────┘
 
