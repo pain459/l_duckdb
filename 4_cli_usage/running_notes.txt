@@ -104,7 +104,51 @@ D
 
 ---
 
+# Navigating databases
 
+D show tables;
+┌──────────────────┐
+│       name       │
+│     varchar      │
+├──────────────────┤
+│ albums           │
+│ artists          │
+│ customers        │
+│ employees        │
+│ genres           │
+│ invoice_items    │
+│ invoices         │
+│ media_types      │
+│ playlist_track   │
+│ playlists        │
+│ sqlite_sequence  │
+│ sqlite_stat1     │
+│ tracks           │
+│ v_average_checks │
+├──────────────────┤
+│     14 rows      │
+└──────────────────┘
+D from invoices limit 2;
+┌───────────┬────────────┬─────────────────────┬─────────────────────────┬─────────────┬──────────────┬────────────────┬───────────────────┬────────┐
+│ InvoiceId │ CustomerId │     InvoiceDate     │     BillingAddress      │ BillingCity │ BillingState │ BillingCountry │ BillingPostalCode │ Total  │
+│   int64   │   int64    │      timestamp      │         varchar         │   varchar   │   varchar    │    varchar     │      varchar      │ double │
+├───────────┼────────────┼─────────────────────┼─────────────────────────┼─────────────┼──────────────┼────────────────┼───────────────────┼────────┤
+│         1 │          2 │ 2009-01-01 00:00:00 │ Theodor-Heuss-Straße 34 │ Stuttgart   │              │ Germany        │ 70174             │   1.98 │
+│         2 │          4 │ 2009-01-02 00:00:00 │ Ullevålsveien 14        │ Oslo        │              │ Norway         │ 0171              │   3.96 │
+└───────────┴────────────┴─────────────────────┴─────────────────────────┴─────────────┴──────────────┴────────────────┴───────────────────┴────────┘
+D from tracks limit 2;
+┌─────────┬─────────────────────────────────────────┬─────────┬─────────────┬─────────┬───────────────────────────────────────────┬──────────────┬──────────┬───────────┐
+│ TrackId │                  Name                   │ AlbumId │ MediaTypeId │ GenreId │                 Composer                  │ Milliseconds │  Bytes   │ UnitPrice │
+│  int64  │                 varchar                 │  int64  │    int64    │  int64  │                  varchar                  │    int64     │  int64   │  double   │
+├─────────┼─────────────────────────────────────────┼─────────┼─────────────┼─────────┼───────────────────────────────────────────┼──────────────┼──────────┼───────────┤
+│       1 │ For Those About To Rock (We Salute You) │       1 │           1 │       1 │ Angus Young, Malcolm Young, Brian Johnson │       343719 │ 11170334 │      0.99 │
+│       2 │ Balls to the Wall                       │       2 │           2 │       1 │                                           │       342562 │  5510424 │      0.99 │
+└─────────┴─────────────────────────────────────────┴─────────┴─────────────┴─────────┴───────────────────────────────────────────┴──────────────┴──────────┴───────────┘
+D 
 
+---
 
+# Delete view
+$ drop view v_average_checks
 
+--- 
