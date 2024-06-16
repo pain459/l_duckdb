@@ -142,3 +142,132 @@ D
 
 ---
 
+# Getting help from duckdb
+
+D .help mode
+.mode MODE ?TABLE?       Set output mode
+   MODE is one of:
+     ascii     Columns/rows delimited by 0x1F and 0x1E
+     box       Tables using unicode box-drawing characters
+     csv       Comma-separated values
+     column    Output in columns.  (See .width)
+     duckbox   Tables with extensive features
+     html      HTML <table> code
+     insert    SQL insert statements for TABLE
+     json      Results in a JSON array
+     jsonlines Results in a NDJSON
+     latex     LaTeX tabular environment code
+     line      One value per line
+     list      Values delimited by "|"
+     markdown  Markdown table format
+     quote     Escape answers as for SQL
+     table     ASCII-art table
+     tabs      Tab-separated values
+     tcl       TCL list elements
+     trash     No output
+D 
+
+---
+
+# Changing mode of data in duckdb
+
+D .mode line
+D SELECT * FROM read_csv_auto ('https://raw.githubusercontent.com/JeffSackmann/tennis_atp/master/atp_matches_2023.csv') LIMIT 1;
+        tourney_id = 2023-9900
+      tourney_name = United Cup
+           surface = Hard
+         draw_size = 18
+     tourney_level = A
+      tourney_date = 20230102
+         match_num = 300
+         winner_id = 126203
+       winner_seed = 3
+      winner_entry = 
+       winner_name = Taylor Fritz
+       winner_hand = R
+         winner_ht = 193
+        winner_ioc = USA
+        winner_age = 25.1
+          loser_id = 126610
+        loser_seed = 5
+       loser_entry = 
+        loser_name = Matteo Berrettini
+        loser_hand = R
+          loser_ht = 196
+         loser_ioc = ITA
+         loser_age = 26.7
+             score = 7-6(4) 7-6(6)
+           best_of = 3
+             round = F
+           minutes = 135
+             w_ace = 15
+              w_df = 2
+            w_svpt = 85
+           w_1stIn = 52
+          w_1stWon = 45
+          w_2ndWon = 16
+           w_SvGms = 12
+         w_bpSaved = 0
+         w_bpFaced = 0
+             l_ace = 7
+              l_df = 2
+            l_svpt = 97
+           l_1stIn = 62
+          l_1stWon = 47
+          l_2ndWon = 15
+           l_SvGms = 12
+         l_bpSaved = 9
+         l_bpFaced = 9
+       winner_rank = 9
+winner_rank_points = 3355
+        loser_rank = 16
+ loser_rank_points = 2375
+D 
+
+---
+
+# One more example of data in mode line
+
+D SELECT COUNT(*) FROM read_csv_auto ('https://raw.githubusercontent.com/JeffSackmann/tennis_atp/master/atp_matches_2023.csv');
+count_star() = 2986
+
+---
+
+# Back to duck box presentation
+
+D .mode box
+D SELECT COUNT(*) FROM read_csv_auto ('https://raw.githubusercontent.com/JeffSackmann/tennis_atp/master/atp_matches_2023.csv');
+┌──────────────┐
+│ count_star() │
+├──────────────┤
+│ 2986         │
+└──────────────┘
+D 
+
+---
+
+# Data navigation
+
+D select winner_ioc, loser_ioc, winner_hand, loser_hand, count(distinct(tourney_id)) as num_winners, avg(winner_age) as avg_winner_age, max(loser_age) as max_loser_age
+          from read_csv_auto('https://raw.githubusercontent.com/JeffSackmann/tennis_atp/master/atp_matches_2023.csv')
+              group by all LIMIT 10;
+┌────────────┬───────────┬─────────────┬────────────┬─────────────┬────────────────────┬───────────────┐
+│ winner_ioc │ loser_ioc │ winner_hand │ loser_hand │ num_winners │   avg_winner_age   │ max_loser_age │
+├────────────┼───────────┼─────────────┼────────────┼─────────────┼────────────────────┼───────────────┤
+│ GRE        │ CRO       │ R           │ R          │ 4           │ 24.75              │ 26.7          │
+│ GBR        │ USA       │ L           │ R          │ 4           │ 24.9               │ 29.4          │
+│ GRE        │ BEL       │ U           │ R          │ 1           │ 18.3               │ 23.5          │
+│ GRE        │ BUL       │ R           │ R          │ 1           │ 24.3               │ 31.6          │
+│ SUI        │ KAZ       │ R           │ R          │ 2           │ 37.75              │ 25.6          │
+│ CZE        │ GER       │ R           │ R          │ 2           │ 21.3               │ 33.0          │
+│ AUS        │ ESP       │ R           │ L          │ 5           │ 29.21666666666667  │ 39.3          │
+│ GBR        │ ESP       │ R           │ L          │ 1           │ 32.6               │ 34.9          │
+│ CRO        │ ARG       │ R           │ R          │ 2           │ 25.975             │ 31.2          │
+│ RUS        │ RUS       │ R           │ R          │ 11          │ 27.061538461538458 │ 29.8          │
+└────────────┴───────────┴─────────────┴────────────┴─────────────┴────────────────────┴───────────────┘
+D 
+
+---
+
+
+
