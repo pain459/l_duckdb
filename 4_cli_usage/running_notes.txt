@@ -427,6 +427,24 @@ D
 
 ---
 
+# Useful feature for DataScience. Using SAMPLE function.
+
+D select Total from Invoices where Total > 10 USING sample 10% (bernoulli);
+┌────────┐
+│ Total  │
+│ double │
+├────────┤
+│  13.86 │
+│  18.86 │
+│  13.86 │
+│  23.86 │
+│  13.86 │
+└────────┘
+D 
+
+---
+
+
 
 
 
