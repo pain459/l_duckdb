@@ -392,3 +392,41 @@ D select distinct(columns(* exclude(InvoiceId, CustomerId, InvoiceDate, Total)))
 D 
 
 ---
+
+# Grouping the results sql vs duckdb
+
+# SQL way
+
+D select BillingCountry, BillingState, BillingPostalCode, sum(Total) from invoices group by 1, 2, 3 limit 5;
+┌────────────────┬──────────────┬───────────────────┬────────────────────┐
+│ BillingCountry │ BillingState │ BillingPostalCode │     sum(Total)     │
+│    varchar     │   varchar    │      varchar      │       double       │
+├────────────────┼──────────────┼───────────────────┼────────────────────┤
+│ Germany        │              │ 70174             │ 37.620000000000005 │
+│ United Kingdom │              │ N1 5LH            │ 37.620000000000005 │
+│ Canada         │ NS           │ B3S 1C5           │ 37.620000000000005 │
+│ Canada         │ NT           │ X1A 1N6           │              37.62 │
+│ Canada         │ BC           │ V6C 1G8           │ 38.620000000000005 │
+└────────────────┴──────────────┴───────────────────┴────────────────────┘
+D 
+
+# Using group by ALL, less typing
+
+D select BillingCountry, BillingState, BillingPostalCode, sum(Total) from invoices group by ALL limit 5;
+┌────────────────┬──────────────┬───────────────────┬────────────────────┐
+│ BillingCountry │ BillingState │ BillingPostalCode │     sum(Total)     │
+│    varchar     │   varchar    │      varchar      │       double       │
+├────────────────┼──────────────┼───────────────────┼────────────────────┤
+│ Belgium        │              │ 1000              │              37.62 │
+│ Portugal       │              │                   │  77.23999999999998 │
+│ Canada         │ ON           │ M6J 1V1           │              37.62 │
+│ Italy          │ RM           │ 00192             │ 37.620000000000005 │
+│ India          │              │ 110017            │ 38.620000000000005 │
+└────────────────┴──────────────┴───────────────────┴────────────────────┘
+D 
+
+---
+
+
+
+
