@@ -116,6 +116,17 @@ D show tables;
 │ customers        │
 │ employees        │
 │ genres           │
+
+D summarize v_average_checks;
+┌────────────────┬─────────────┬────────────┬────────────────┬───────────────┬───────────────────┬───────────────────┬─────────┬─────────┬─────────┬───────┬─────────────────┐
+│  column_name   │ column_type │    min     │      max       │ approx_unique │        avg        │        std        │   q25   │   q50   │   q75   │ count │ null_percentage │
+│    varchar     │   varchar   │  varchar   │    varchar     │     int64     │      varchar      │      varchar      │ varchar │ varchar │ varchar │ int64 │  decimal(9,2)   │
+├────────────────┼─────────────┼────────────┼────────────────┼───────────────┼───────────────────┼───────────────────┼─────────┼─────────┼─────────┼───────┼─────────────────┤
+│ BillingCountry │ VARCHAR     │ Argentina  │ United Kingdom │            24 │                   │                   │         │         │         │   391 │            0.00 │
+│ day            │ DATE        │ 2009-01-01 │ 2013-12-22     │           353 │                   │                   │         │         │         │   391 │            0.00 │
+│ avg_check      │ DOUBLE      │ 0.99       │ 25.86          │            22 │ 5.840204603580564 │ 4.797668072344001 │ 1.98    │ 3.96    │ 8.91    │   391 │            0.00 │
+└────────────────┴─────────────┴────────────┴────────────────┴───────────────┴───────────────────┴───────────────────┴─────────┴─────────┴─────────┴───────┴─────────────────┘
+D 
 │ invoice_items    │
 │ invoices         │
 │ media_types      │
@@ -152,3 +163,103 @@ D
 $ drop view v_average_checks
 
 --- 
+
+# Create views
+
+D create view v_average_checks as
+          select BillingCountry, date_trunc('day', InvoiceDate) as day, avg(Total) as avg_check
+              from invoices
+              group by BillingCountry, day;
+
+---
+
+# Summarize views
+
+D summarize v_average_checks;
+┌────────────────┬─────────────┬────────────┬────────────────┬───────────────┬───────────────────┬───────────────────┬─────────┬─────────┬─────────┬───────┬─────────────────┐
+│  column_name   │ column_type │    min     │      max       │ approx_unique │        avg        │        std        │   q25   │   q50   │   q75   │ count │ null_percentage │
+│    varchar     │   varchar   │  varchar   │    varchar     │     int64     │      varchar      │      varchar      │ varchar │ varchar │ varchar │ int64 │  decimal(9,2)   │
+├────────────────┼─────────────┼────────────┼────────────────┼───────────────┼───────────────────┼───────────────────┼─────────┼─────────┼─────────┼───────┼─────────────────┤
+│ BillingCountry │ VARCHAR     │ Argentina  │ United Kingdom │            24 │                   │                   │         │         │         │   391 │            0.00 │
+│ day            │ DATE        │ 2009-01-01 │ 2013-12-22     │           353 │                   │                   │         │         │         │   391 │            0.00 │
+│ avg_check      │ DOUBLE      │ 0.99       │ 25.86          │            22 │ 5.840204603580564 │ 4.797668072344001 │ 1.98    │ 3.96    │ 8.91    │   391 │            0.00 │
+└────────────────┴─────────────┴────────────┴────────────────┴───────────────┴───────────────────┴───────────────────┴─────────┴─────────┴─────────┴───────┴─────────────────┘
+D 
+
+---
+
+# See the list of view in duckdb
+
+D from duckdb_views();
+┌───────────────┬──────────────┬────────────────────┬────────────┬──────────────────────┬──────────┬─────────┬──────────────────────┬──────────┬───────────┬──────────────┬─────────────────────────┐
+│ database_name │ database_oid │    schema_name     │ schema_oid │      view_name       │ view_oid │ comment │         tags         │ internal │ temporary │ column_count │           sql           │
+│    varchar    │    int64     │      varchar       │   int64    │       varchar        │  int64   │ varchar │ map(varchar, varch…  │ boolean  │  boolean  │    int64     │         varchar         │
+├───────────────┼──────────────┼────────────────────┼────────────┼──────────────────────┼──────────┼─────────┼──────────────────────┼──────────┼───────────┼──────────────┼─────────────────────────┤
+│ chinook       │         1088 │ main               │       1091 │ v_average_checks     │     2046 │         │ {}                   │ false    │ false     │            3 │ CREATE VIEW v_average…  │
+│ system        │            0 │ information_schema │       1807 │ character_sets       │     1828 │         │ {}                   │ true     │ true      │            8 │ CREATE TEMPORARY VIEW…  │
+│ system        │            0 │ information_schema │       1807 │ columns              │     1825 │         │ {}                   │ true     │ true      │           45 │ CREATE TEMPORARY VIEW…  │
+│ system        │            0 │ information_schema │       1807 │ key_column_usage     │     1830 │         │ {}                   │ true     │ true      │            9 │ CREATE TEMPORARY VIEW…  │
+│ system        │            0 │ information_schema │       1807 │ referential_constr…  │     1829 │         │ {}                   │ true     │ true      │            9 │ CREATE TEMPORARY VIEW…  │
+│ system        │            0 │ information_schema │       1807 │ schemata             │     1826 │         │ {}                   │ true     │ true      │            7 │ CREATE TEMPORARY VIEW…  │
+│ system        │            0 │ information_schema │       1807 │ tables               │     1827 │         │ {}                   │ true     │ true      │           13 │ CREATE TEMPORARY VIEW…  │
+│ system        │            0 │ information_schema │       1807 │ table_constraints    │     1831 │         │ {}                   │ true     │ true      │           11 │ CREATE TEMPORARY VIEW…  │
+│ system        │            0 │ main               │          0 │ duckdb_columns       │     1840 │         │ {}                   │ true     │ true      │           18 │ CREATE TEMPORARY VIEW…  │
+│ system        │            0 │ main               │          0 │ duckdb_constraints   │     1839 │         │ {}                   │ true     │ true      │           12 │ CREATE TEMPORARY VIEW…  │
+│ system        │            0 │ main               │          0 │ duckdb_databases     │     1841 │         │ {}                   │ true     │ true      │            8 │ CREATE TEMPORARY VIEW…  │
+│ system        │            0 │ main               │          0 │ duckdb_indexes       │     1842 │         │ {}                   │ true     │ true      │           14 │ CREATE TEMPORARY VIEW…  │
+│ system        │            0 │ main               │          0 │ duckdb_schemas       │     1843 │         │ {}                   │ true     │ true      │            8 │ CREATE TEMPORARY VIEW…  │
+│ system        │            0 │ main               │          0 │ duckdb_tables        │     1844 │         │ {}                   │ true     │ true      │           16 │ CREATE TEMPORARY VIEW…  │
+│ system        │            0 │ main               │          0 │ duckdb_types         │     1845 │         │ {}                   │ true     │ true      │           13 │ CREATE TEMPORARY VIEW…  │
+│ system        │            0 │ main               │          0 │ duckdb_views         │     1846 │         │ {}                   │ true     │ true      │           12 │ CREATE TEMPORARY VIEW…  │
+│ system        │            0 │ main               │          0 │ pragma_database_list │     1832 │         │ {}                   │ true     │ true      │            3 │ CREATE TEMPORARY VIEW…  │
+│ system        │            0 │ main               │          0 │ sqlite_master        │     1834 │         │ {}                   │ true     │ true      │            5 │ CREATE TEMPORARY VIEW…  │
+│ system        │            0 │ main               │          0 │ sqlite_schema        │     1836 │         │ {}                   │ true     │ true      │            5 │ CREATE TEMPORARY VIEW…  │
+│ system        │            0 │ main               │          0 │ sqlite_temp_master   │     1837 │         │ {}                   │ true     │ true      │            5 │ CREATE TEMPORARY VIEW…  │
+│  ·            │            · │  ·                 │          · │   ·                  │       ·  │    ·    │ ·                    │  ·       │  ·        │            · │            ·            │
+│  ·            │            · │  ·                 │          · │   ·                  │       ·  │    ·    │ ·                    │  ·       │  ·        │            · │            ·            │
+│  ·            │            · │  ·                 │          · │   ·                  │       ·  │    ·    │ ·                    │  ·       │  ·        │            · │            ·            │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_am                │     1884 │         │ {}                   │ true     │ true      │            4 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_attrdef           │     1886 │         │ {}                   │ true     │ true      │            4 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_attribute         │     1885 │         │ {}                   │ true     │ true      │           26 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_class             │     1887 │         │ {}                   │ true     │ true      │           35 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_constraint        │     1888 │         │ {}                   │ true     │ true      │           25 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_database          │     1889 │         │ {}                   │ true     │ true      │            2 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_depend            │     1890 │         │ {}                   │ true     │ true      │            7 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_description       │     1891 │         │ {}                   │ true     │ true      │            4 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_enum              │     1892 │         │ {}                   │ true     │ true      │            4 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_index             │     1893 │         │ {}                   │ true     │ true      │           20 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_indexes           │     1894 │         │ {}                   │ true     │ true      │            5 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_namespace         │     1895 │         │ {}                   │ true     │ true      │            4 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_proc              │     1896 │         │ {}                   │ true     │ true      │           31 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_sequence          │     1897 │         │ {}                   │ true     │ true      │            8 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_sequences         │     1898 │         │ {}                   │ true     │ true      │           11 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_settings          │     1899 │         │ {}                   │ true     │ true      │            4 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_tables            │     1900 │         │ {}                   │ true     │ true      │            7 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_tablespace        │     1901 │         │ {}                   │ true     │ true      │            5 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_type              │     1902 │         │ {}                   │ true     │ true      │           32 │ CREATE TEMPORARY VIEW…  │
+│ temp          │         1764 │ pg_catalog         │       1810 │ pg_views             │     1903 │         │ {}                   │ true     │ true      │            4 │ CREATE TEMPORARY VIEW…  │
+├───────────────┴──────────────┴────────────────────┴────────────┴──────────────────────┴──────────┴─────────┴──────────────────────┴──────────┴───────────┴──────────────┴─────────────────────────┤
+│ 81 rows (40 shown)                                                                                                                                                                     12 columns │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+D 
+
+---
+
+# grep through the views using sqlite_master
+
+D select name from sqlite_master where type =  'view';
+┌──────────────────┐
+│       name       │
+│     varchar      │
+├──────────────────┤
+│ v_average_checks │
+└──────────────────┘
+D select name from sqlite_master where type = 'view' and name like '%average%'; 
+┌──────────────────┐
+│       name       │
+│     varchar      │
+├──────────────────┤
+│ v_average_checks │
+└──────────────────┘
+
+---
