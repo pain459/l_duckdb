@@ -263,3 +263,36 @@ D select name from sqlite_master where type = 'view' and name like '%average%';
 └──────────────────┘
 
 ---
+
+# Using exclude feature while searching the tables.
+
+# Step 1 see the fields and step 2 exclude the columns.
+D describe invoices;
+┌───────────────────┬─────────────┬─────────┬─────────┬─────────┬─────────┐
+│    column_name    │ column_type │  null   │   key   │ default │  extra  │
+│      varchar      │   varchar   │ varchar │ varchar │ varchar │ varchar │
+├───────────────────┼─────────────┼─────────┼─────────┼─────────┼─────────┤
+│ InvoiceId         │ BIGINT      │ NO      │ PRI     │         │         │
+│ CustomerId        │ BIGINT      │ NO      │         │         │         │
+│ InvoiceDate       │ TIMESTAMP   │ NO      │         │         │         │
+│ BillingAddress    │ VARCHAR     │ YES     │         │         │         │
+│ BillingCity       │ VARCHAR     │ YES     │         │         │         │
+│ BillingState      │ VARCHAR     │ YES     │         │         │         │
+│ BillingCountry    │ VARCHAR     │ YES     │         │         │         │
+│ BillingPostalCode │ VARCHAR     │ YES     │         │         │         │
+│ Total             │ DOUBLE      │ NO      │         │         │         │
+└───────────────────┴─────────────┴─────────┴─────────┴─────────┴─────────┘
+D select * exclude(BillingAddress, BillingCity, BillingState) from invoices limit 5;
+┌───────────┬────────────┬─────────────────────┬────────────────┬───────────────────┬────────┐
+│ InvoiceId │ CustomerId │     InvoiceDate     │ BillingCountry │ BillingPostalCode │ Total  │
+│   int64   │   int64    │      timestamp      │    varchar     │      varchar      │ double │
+├───────────┼────────────┼─────────────────────┼────────────────┼───────────────────┼────────┤
+│         1 │          2 │ 2009-01-01 00:00:00 │ Germany        │ 70174             │   1.98 │
+│         2 │          4 │ 2009-01-02 00:00:00 │ Norway         │ 0171              │   3.96 │
+│         3 │          8 │ 2009-01-03 00:00:00 │ Belgium        │ 1000              │   5.94 │
+│         4 │         14 │ 2009-01-06 00:00:00 │ Canada         │ T6G 2C7           │   8.91 │
+│         5 │         23 │ 2009-01-11 00:00:00 │ USA            │ 2113              │  13.86 │
+└───────────┴────────────┴─────────────────────┴────────────────┴───────────────────┴────────┘
+D 
+
+---
